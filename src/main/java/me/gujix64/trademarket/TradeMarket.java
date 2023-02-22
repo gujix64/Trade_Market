@@ -189,7 +189,13 @@ public final class TradeMarket extends JavaPlugin implements Listener {
                 sender.sendMessage("This command can only be run by a player.");
                 return false;
             }
-
+            if(args.length == 1 && args[0].equalsIgnoreCase("help"))
+            {
+                Player player = (Player) sender;
+                player.sendMessage(ChatColor.GREEN + "/trademarket sell <item id> <item ammount> - Sells item in main hand for item id and item ammount in arguments");
+                player.sendMessage(ChatColor.GREEN +"/trademarket receive - Here player can take items");
+                player.sendMessage(ChatColor.GREEN +"/trademarket - Opens market");
+            }
             if(args.length == 3 && args[0].equalsIgnoreCase("sell"))
             {
                 Player player = (Player) sender;
