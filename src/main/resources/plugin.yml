@@ -1,0 +1,7 @@
+name: TradeMarket
+version: '${project.version}'
+main: me.gujix64.trademarket.TradeMarket
+api-version: 1.19
+authors: [ Gujix64 ]
+commands:
+  trademarket:
