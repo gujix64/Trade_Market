@@ -1,6 +1,8 @@
 package me.gujix64.trademarket;
 
 
+import me.gujix64.trademarket.lang.lang;
+import me.gujix64.trademarket.settings.settings;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -39,7 +41,9 @@ import static me.gujix64.trademarket.Operations.checkMaterial;
 
 public final class TradeMarket extends JavaPlugin implements Listener {
 
-
+    public String col(String message) {
+        return ChatColor.translateAlternateColorCodes('&', message);
+    }
     private Map<String, List<ItemStack>> receiveItems = new HashMap<>();
     private List<String> ReceiveOpen = new ArrayList<>();
 
@@ -82,7 +86,7 @@ public final class TradeMarket extends JavaPlugin implements Listener {
             ItemStack costItem = itemSection.getItemStack("costItem");
             String owner = itemSection.getString("owner");
             MarketItem marketItem = new MarketItem(sellingItem, costItem, owner);
-            marketItem.time = 60;
+            marketItem.time = settings.get().getInt("time");
             marketItems.add(marketItem);
         }
 
@@ -166,6 +170,10 @@ public final class TradeMarket extends JavaPlugin implements Listener {
     }
     @Override
     public void onEnable() {
+        settings.setup();
+        settings.defaultsetup();
+        settings.get().options().copyDefaults(true);
+        settings.save();
         marketItems = loadMarketItemsFromFile();
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
         loadIReceiveItems();
@@ -176,6 +184,10 @@ public final class TradeMarket extends JavaPlugin implements Listener {
                 decreaseTime(marketItems);
             }
         }, 0L, 1200L);
+        lang.setup();
+        lang.defaultsetup();
+        lang.get().options().copyDefaults(true);
+        lang.save();
     }
 
     @Override
@@ -189,10 +201,10 @@ public final class TradeMarket extends JavaPlugin implements Listener {
             if(args.length == 1 && args[0].equalsIgnoreCase("help"))
             {
                 Player player = (Player) sender;
-                player.sendMessage(ChatColor.GREEN + "/trademarket sell <item id> <item amount> - Sells item in main hand for item id and item amount in arguments");
-                player.sendMessage(ChatColor.GREEN +"/trademarket receive - Here player can take items");
-                player.sendMessage(ChatColor.GREEN +"/trademarket - Opens market");
-                player.sendMessage(ChatColor.GREEN + "/trademarket info - information about plugin");
+                player.sendMessage(col(lang.get().getString("help-1")));
+                player.sendMessage(col(lang.get().getString("help-2")));
+                player.sendMessage(col(lang.get().getString("help-3")));
+                player.sendMessage(col(lang.get().getString("help-4")));
             }
             if(args.length == 1 && args[0].equalsIgnoreCase("info"))
             {
@@ -213,7 +225,7 @@ public final class TradeMarket extends JavaPlugin implements Listener {
                 }
                 int costItemValue = Integer.parseInt(args[2]);
                 if (itemToSell.getType() == Material.AIR) {
-                    player.sendMessage("You must hold an item to sell it on the market.");
+                    player.sendMessage(col(lang.get().getString("error-1")));
                     return false;
                 }
                 if(!checkMaterial(args[1],player))
@@ -228,16 +240,16 @@ public final class TradeMarket extends JavaPlugin implements Listener {
                         number++;
                     }
                 }
-                if(number >= 9)
+                if(number >= settings.get().getInt("max_items"))
                 {
-                    player.sendMessage("You have max amount of items on sale");
+                    player.sendMessage(col(lang.get().getString("error-2")));
                     return false;
                 }
                 Material material = Material.matchMaterial(args[1]);
                 ItemStack costItemStack = new ItemStack(material,costItemValue);
                 addMarketItem(itemToSell,costItemStack,player.getName());
                 saveMarketItemsToFile();
-                player.sendMessage("" + itemToSell.getAmount() + "x " + itemToSell.getType() + " added to market for " + costItemValue + "x " + costItemID + ".");
+                player.sendMessage(ChatColor.GRAY +  "" + itemToSell.getAmount() + "x " + itemToSell.getType() + " added to market for " + costItemValue + "x " + costItemID + ".");
                 player.getInventory().setItemInMainHand(null);
                 return true;
             }
@@ -251,7 +263,7 @@ public final class TradeMarket extends JavaPlugin implements Listener {
                 Player player = (Player) sender;
                 String owner = player.getName();
                 if (!receiveItems.containsKey(owner) || receiveItems.get(owner).isEmpty()) {
-                    player.sendMessage("You have no items to receive!");
+                    player.sendMessage(col(lang.get().getString("error-3")));
                     return true;
                 }
                 List<ItemStack> playerItems = receiveItems.get(owner);
@@ -298,7 +310,7 @@ public final class TradeMarket extends JavaPlugin implements Listener {
                     {
                         if(item.getOwner().equalsIgnoreCase(player.getName()))
                         {
-                            player.sendMessage("You cant buy own item");
+                            player.sendMessage(col(lang.get().getString("error-4")));
                             return;
                         }
                         player.getInventory().removeItem(item.getCostItem());
@@ -313,7 +325,7 @@ public final class TradeMarket extends JavaPlugin implements Listener {
                         event.getClickedInventory().removeItem(event.getCurrentItem());
                         marketItems.remove(item);
                         saveMarketItemsToFile();
-                        player.sendMessage("You have successfully purchased " + item.getSellingItem().getAmount()+ "x " + item.getSellingItem().getType() + " for " + item.getCostItem().getAmount() + "x " + item.getCostItem().getType());
+                        player.sendMessage( col(lang.get().getString("message-2")) + item.getSellingItem().getAmount()+ "x " + item.getSellingItem().getType() + " "+ col(lang.get().getString("message-3"))+" " + item.getCostItem().getAmount() + "x " + item.getCostItem().getType());
                         updateInventory();
                         String owner = key.substring(11);
                         Pattern pattern = Pattern.compile("7(\\d+)x");
@@ -330,11 +342,11 @@ public final class TradeMarket extends JavaPlugin implements Listener {
                         Player ownerPlayer = Bukkit.getPlayer(owner);
                         if(ownerPlayer != null)
                         {
-                            ownerPlayer.sendMessage("Someone bought your item! Receive it by typing /trademarket receive");
+                            ownerPlayer.sendMessage(col(lang.get().getString("message-4")));
                         }
                     } else
                     {
-                        player.sendMessage("You do not have enough " + item.getCostItem().getType() + " to purchase " + item.getSellingItem().getAmount() + "x " + item.getSellingItem().getType());
+                        player.sendMessage(col(lang.get().getString("error-5")) + item.getCostItem().getType() + " "+col(lang.get().getString("message-5"))+ " " + item.getSellingItem().getAmount() + "x " + item.getSellingItem().getType());
                     }
                     break;
                 }
@@ -398,7 +410,7 @@ public final class TradeMarket extends JavaPlugin implements Listener {
         {
             event.getPlayer().sendMessage("");
             event.getPlayer().sendMessage("");
-            event.getPlayer().sendMessage("You have items in your receive section check it out!");
+            event.getPlayer().sendMessage(col(lang.get().getString("message-6")));
             event.getPlayer().sendMessage("");
             event.getPlayer().sendMessage("");
         }

@@ -1,5 +1,6 @@
 package me.gujix64.trademarket;
 
+import me.gujix64.trademarket.settings.settings;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class MarketItemClass {
             this.sellingItem = sellingItem;
             this.costItem = costItem;
             this.owner = owner;
-            this.time = 60;
+            this.time = settings.get().getInt("time");
         }
 
         public ItemStack getSellingItem() {
