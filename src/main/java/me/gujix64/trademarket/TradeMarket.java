@@ -189,9 +189,18 @@ public final class TradeMarket extends JavaPlugin implements Listener {
             if(args.length == 1 && args[0].equalsIgnoreCase("help"))
             {
                 Player player = (Player) sender;
-                player.sendMessage(ChatColor.GREEN + "/trademarket sell <item id> <item ammount> - Sells item in main hand for item id and item ammount in arguments");
+                player.sendMessage(ChatColor.GREEN + "/trademarket sell <item id> <item amount> - Sells item in main hand for item id and item amount in arguments");
                 player.sendMessage(ChatColor.GREEN +"/trademarket receive - Here player can take items");
                 player.sendMessage(ChatColor.GREEN +"/trademarket - Opens market");
+                player.sendMessage(ChatColor.GREEN + "/trademarket info - information about plugin");
+            }
+            if(args.length == 1 && args[0].equalsIgnoreCase("info"))
+            {
+                Player player = (Player) sender;
+                player.sendMessage(ChatColor.GREEN + "Author: Gujix64");
+                player.sendMessage(ChatColor.GREEN + "Version: 1.0 - Beta");
+                player.sendMessage(ChatColor.GREEN + "Contact: Gujix64#1418");
+
             }
             if(args.length == 3 && args[0].equalsIgnoreCase("sell"))
             {
